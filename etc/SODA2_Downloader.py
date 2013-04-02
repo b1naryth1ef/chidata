@@ -15,7 +15,8 @@ DATA = []
 
 def getRequest(i):
     r = requests.get(URL, headers=HEADERS, params={"$limit": 1000, "$offset": 1000*i})
-    if r.status_code != 200: return
+    if not len(r.json()): return None
+    if r.status_code != 200: return None
     return r
 
 
