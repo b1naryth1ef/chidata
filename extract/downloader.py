@@ -47,7 +47,7 @@ def download(output, id, token, per):
 
         # If we're at the first page, write our headers
         if page == 1:
-            output.write(data[0])
+            output.write(data[0] + '\n')
 
         output.write('\n'.join(data[1:]))
 
