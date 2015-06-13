@@ -21,11 +21,11 @@ args = vars(parser.parse_args())
 
 def build_table_format(source, size, pkey):
     """
-    TODO: rewrite docs lewl
-    This function attempts to guess the types of CSV columns by sampling
-    `size` many rows and checking their composable types. If it finds a
-    type (float, int) that would better match vs a string, it will select
-    that instead of a string. Returns a dic
+    Attempts to intellgiently detect the type of columns in our data set,
+    and builds a mapping of column name too column type. This is later
+    used to generate the PG table.
+
+    This function uses a sample of our dataset to detect the type of columns.
     """
     reader = csv.reader(source)
 

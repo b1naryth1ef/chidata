@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-Download a full CSV-dump of a City of Chicago Data set
-using the SODA API. This script can be used to efficiently
-download large (25,000+ row) data sets that would the
-data portal otherwise refuses to export.
+Download a full-size CSV file for a City of Chicago data set using the SODA2 API.
+This script can be used to efficiently and quickly download extremely large data
+sets that would otherwise be impossible to export through the City's data portal
+website.
 """
 
 import os, sys, time, csv, argparse
@@ -19,13 +19,21 @@ parser.add_argument("--per", help="rows to download per page", type=int, default
 args = vars(parser.parse_args())
 
 def download_page(id, page, token, per):
+    """
+    Downloads a page. Will retry 3 times before failing. Returns the header and
+    page content on success, or None if the data returned is empty.
+    """
     for retry in range(3):
         r = requests.get(URL.format(id),
                 params={"$limit": per, "$offset": per * (page- 1)},
                 headers={"X-App-Token": token})
 
         if len(r.content) and r.status_code == requests.codes.ok:
-            return r.content.split("\n")[0:-1]
+            data = r.content.split("\n", 1)
+            if len(data) < 1:
+                return None, None
+
+            return tuple(data)
 
         time.sleep(1)
 
@@ -39,17 +47,17 @@ def download(output, id, token, per):
         sys.stdout.write("\r  downloading page {}".format(page))
         sys.stdout.flush()
 
-        data = download_page(id, page, token, per)
+        header, data = download_page(id, page, token, per)
 
-        # If we only get the header back, we have no more data
-        if len(data) == 1:
+        # If we don't have any data that means we hit the last page
+        if not data:
             break
 
         # If we're at the first page, write our headers
         if page == 1:
-            output.write(data[0] + '\n')
+            output.write(header + '\n')
 
-        output.write('\n'.join(data[1:]) + '\n')
+        output.write(data)
 
     print "\n Downloaded {} pages!".format(page - 1)
 
