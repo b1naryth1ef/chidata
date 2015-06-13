@@ -36,8 +36,8 @@ def download(output, id, token, per):
 
     # SODA doesn't support finding how many pages exist, so we just brute force it
     for page in xrange(1, 10**10):
-        #sys.stdout.write("\r  downloading page {}".format(page))
-        #sys.stdout.flush()
+        sys.stdout.write("\r  downloading page {}".format(page))
+        sys.stdout.flush()
 
         data = download_page(id, page, token, per)
 
