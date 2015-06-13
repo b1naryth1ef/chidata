@@ -52,6 +52,7 @@ def build_table_format(source, size, pkey):
             try:
                 float(col)
                 type_data[i].add(float)
+                continue
             except: pass
 
             type_data[i].add(str)
