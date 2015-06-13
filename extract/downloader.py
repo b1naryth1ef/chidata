@@ -49,7 +49,7 @@ def download(output, id, token, per):
         if page == 1:
             output.write(data[0] + '\n')
 
-        output.write('\n'.join(data[1:]))
+        output.write('\n'.join(data[1:]) + '\n')
 
     print "\n Downloaded {} pages!".format(page - 1)
 
