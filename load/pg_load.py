@@ -17,9 +17,17 @@ parser.add_argument("--table", help="postgres table name")
 parser.add_argument("--drop", help="drop table before creating", action='store_true', default=True)
 parser.add_argument("--detect", help="number of rows to use for type detection", type=int, default=1000)
 parser.add_argument("--key", help="column of the primary key", type=int, default=0)
+parser.add_argument("--extend", help="use an extended set of detection types", action="store_true", default=True)
 args = vars(parser.parse_args())
 
-def build_table_format(source, size, pkey):
+def converts_to(obj, typ):
+    try:
+        typ(obj)
+        return True
+    except:
+        return False
+
+def build_table_format(source, size, pkey, extend):
     """
     Attempts to intellgiently detect the type of columns in our data set,
     and builds a mapping of column name too column type. This is later
@@ -49,11 +57,14 @@ def build_table_format(source, size, pkey):
                 type_data[i].add(bool)
                 continue
 
-            try:
-                float(col)
+            if converts_to(col, float):
                 type_data[i].add(float)
                 continue
-            except: pass
+
+            if extend:
+                if col[0] == '$' and converts_to(col[1:], float):
+                    type_data[i].add('monetary')
+                    continue
 
             type_data[i].add(str)
 
@@ -68,6 +79,8 @@ def build_table_format(source, size, pkey):
 
         if str in data:
             result.append('TEXT')
+        elif 'monetary' in data and len(data) == 1:
+            result.append('MONEY')
         elif float in data:
             result.append('DECIMAL')
         elif int in data:
@@ -116,7 +129,7 @@ def main():
     source = open(args['file'], "r")
 
     print "Detecting table format..."
-    table_fmt = build_table_format(source, args['detect'], args['key'])
+    table_fmt = build_table_format(source, args['detect'], args['key'], args['extend'])
     for k, v in table_fmt:
         print "  {}: {}".format(k, v)
 
